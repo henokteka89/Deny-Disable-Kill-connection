@@ -1,0 +1,16 @@
+--In the event where there are large amounts of connections causing CPU pegged.
+-- "Deny" - denies new connections, but still allows the existing logins to run. "Disable" - disables the login entirely, making it inactive. Existing connections run. "Kill" - kills existing connections. 
+use master
+go
+/* 
+DENY CONNECT SQL TO [username];
+ALTER LOGIN [username] DISABLE;
+*/
+
+declare @kill varchar (max) = '';
+select  @kill = @kill + 'kill ' + convert(varchar(5), session_id) + ';'
+from sys.dm_exec_sessions
+where login_name like '%userna%'
+--and
+
+Print @kill 
