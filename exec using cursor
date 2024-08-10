@@ -1,0 +1,55 @@
+use master
+go
+/* 
+Deny connect to sql to [username];
+Alter login [username] disable;
+*/
+-- Declare the table variable to store the commands
+DECLARE @kill TABLE (command NVARCHAR(500));
+
+-- Insert the create database commands into the table variable
+INSERT INTO @kill
+
+--declare @kill varchar (max) = '';
+select  'kill ' + convert(varchar(5), session_id) + ';'
+from sys.dm_exec_sessions
+where login_name like '%acc%'
+--and
+
+-- Declare a variable to hold each command
+DECLARE @sqlCommand NVARCHAR(500);
+
+-- Cursor to iterate over each command in the table variable
+DECLARE command_cursor CURSOR FOR 
+select command from @kill 
+
+-- Open the cursor
+OPEN command_cursor;
+
+-- Fetch the first command
+FETCH NEXT FROM command_cursor INTO @sqlCommand;
+
+-- Loop through all the commands
+WHILE @@FETCH_STATUS = 0
+BEGIN
+    -- Execute the command
+    EXEC sp_executesql @sqlCommand;
+
+    -- Fetch the next command
+    FETCH NEXT FROM command_cursor INTO @sqlCommand;
+END;
+-- Close and deallocate the cursor
+CLOSE command_cursor;
+DEALLOCATE command_cursor;
+
+--	select * from sys.dm_exec_sessions where login_name like '%acc%'
+--	Exec (@kill)
+--	kill 59;kill 70;kill 100;
+
+
+
+
+
+
+
+
